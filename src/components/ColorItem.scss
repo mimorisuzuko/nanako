@@ -1,0 +1,26 @@
+.base {
+	height: 50px;
+	padding: 5px 10px;
+	box-sizing: border-box;
+
+	* {
+		color: inherit;
+	}
+
+	input[type='text'] {
+		padding: 4px 8px;
+	}
+
+	svg {
+		cursor: pointer;
+		display: inline-block;
+		padding: 0px 2px;
+		border-right-width: 1px;
+		border-right-style: solid;
+		border-right-color: white;
+		
+		&:last-of-type {
+			border-right: none;
+		}
+	}
+}
