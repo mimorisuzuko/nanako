@@ -1,6 +1,0 @@
-{
-	"prettier.eslintIntegration": true,
-	"eslint.options": {
-		"configFile": "./.eslintrc"
-	}
-}
