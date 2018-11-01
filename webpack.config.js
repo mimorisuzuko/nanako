@@ -12,7 +12,7 @@ module.exports = (env, { mode }) => {
 	const context = libpath.join(__dirname, 'src/');
 	const presets = ['react'];
 	const isProduction = mode === 'production';
-	const entry = [context];
+	const entryMain = [context];
 
 	const plugins = [
 		new CleanWebpackPlugin([dst], {
@@ -45,10 +45,10 @@ module.exports = (env, { mode }) => {
 			],
 			'stage-3'
 		);
-		entry.push('babel-polyfill');
+		entryMain.push('babel-polyfill');
 	} else {
 		plugins.push(new HotModuleReplacementPlugin());
-		entry.push(
+		entryMain.push(
 			'webpack-dev-server/client?http://0.0.0.0:3000',
 			'webpack/hot/only-dev-server',
 			'react-hot-loader/patch'
@@ -57,11 +57,13 @@ module.exports = (env, { mode }) => {
 
 	return {
 		context,
-		entry,
+		entry: {
+			index: entryMain
+		},
 		output: {
 			path: libpath.join(__dirname, dst),
 			publicPath: 'http://localhost:3000/',
-			filename: 'index.js'
+			filename: '[name].js'
 		},
 		module: {
 			rules: [
