@@ -9,6 +9,7 @@ import { ColorState } from '../models';
 import { List } from 'immutable';
 import ColorItem from './ColorItem';
 import { ToastContainer, toast } from 'react-toastify';
+import fz from 'fz';
 import './App.scss';
 
 const filename = libpath.join(os.homedir(), '.nanako');
@@ -30,7 +31,8 @@ export default class App extends Component {
 		this.state = {
 			nanakoState,
 			tmpName: '',
-			tmpColor: ''
+			tmpColor: '',
+			query: ''
 		};
 	}
 
@@ -123,12 +125,59 @@ export default class App extends Component {
 		this.setState({ tmpColor: value });
 	}
 
+	/**
+	 * @param {Event} e
+	 */
+	@autobind
+	onChangeQuery(e) {
+		const { currentTarget: { value } } = e;
+
+		this.setState({ query: value });
+	}
+
+	filteredColorsJSX() {
+		const { state: { query, nanakoState } } = this;
+		const filtered = [];
+		const isBlank = query.trim() === '';
+
+		nanakoState.forEach((colorState, i) => {
+			if (!isBlank) {
+				const { matched } = fz(colorState.get('name'), query, true);
+
+				if (!matched) {
+					return;
+				}
+			}
+
+			filtered.push(
+				<ColorItem
+					index={i}
+					colorState={colorState}
+					key={i}
+					deleteThis={this.deleteColor}
+					onChangeState={this.onChangeColorState}
+				/>
+			);
+		});
+
+		return filtered;
+	}
+
 	render() {
-		const { state: { tmpName, tmpColor, nanakoState } } = this;
+		const { state: { tmpName, tmpColor, query } } = this;
 
 		return (
 			<div styleName='base'>
 				<div styleName='header'>
+					<input
+						type='text'
+						value={query}
+						onChange={this.onChangeQuery}
+						placeholder='Search colors'
+					/>
+				</div>
+				<div styleName='colors'>{this.filteredColorsJSX()}</div>
+				<div styleName='footer'>
 					<input
 						type='text'
 						value={tmpName}
@@ -142,17 +191,6 @@ export default class App extends Component {
 						placeholder='Color'
 					/>
 					<button onClick={this.addColor}>ADD</button>
-				</div>
-				<div styleName='colors'>
-					{nanakoState.map((colorState, i) => (
-						<ColorItem
-							index={i}
-							colorState={colorState}
-							key={i}
-							deleteThis={this.deleteColor}
-							onChangeState={this.onChangeColorState}
-						/>
-					))}
 				</div>
 				<ToastContainer autoClose={3000} />
 			</div>

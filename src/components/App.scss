@@ -1,4 +1,5 @@
-$header-height: 58px;
+$header-height: 52px;
+$footer-height: 36px;
 
 .base {
 	position: relative;
@@ -12,22 +13,35 @@ $header-height: 58px;
 }
 
 .header {
-	position: fixed;
-	background-color: white;
-	width: 100%;
+	position: absolute;
 	height: $header-height;
-	box-sizing: border-box;
-	padding: 27px 10px 5px 10px;
-	box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
-	z-index: 1;
+	width: 100%;
 	-webkit-app-region: drag;
+	padding-top: 24px;
+	padding-bottom: 8px;
 
 	input[type='text'] {
-		background-color: rgba(0, 0, 0, 0.1);
+		$m: 8px;
+
+		width: calc(100% - #{$m} * 2);
+		margin: 0 $m;
+		-webkit-app-region: no-drag;
+	}
+}
+
+.footer {
+	position: absolute;
+	bottom: 0;
+	background-color: white;
+	width: 100%;
+	height: $footer-height;
+	box-sizing: border-box;
+	padding: 5px 10px;
+	z-index: 1;
+
+	input[type='text'] {
 		padding: 4px 8px;
 		margin-right: 8px;
-		border-radius: 4px;
-		-webkit-app-region: no-drag;
 	}
 
 	button {
@@ -45,7 +59,7 @@ $header-height: 58px;
 	position: absolute;
 	top: $header-height;
 	width: 100%;
-	height: calc(100% - #{$header-height});
+	height: calc(100% - #{$footer-height} - #{$header-height});
 	overflow: scroll;
 }
 
