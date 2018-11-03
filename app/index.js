@@ -1,4 +1,5 @@
-const { app, BrowserWindow } = require('electron');
+const electron = require('electron');
+const { app, BrowserWindow, ipcMain } = electron;
 const libpath = require('path');
 const { env: { NODE_ENV } } = process;
 const {
@@ -7,26 +8,63 @@ const {
 } = require('electron-devtools-installer');
 
 /** @type {Electron.BrowserWindow} */
-let browserWindow = null;
+let mainWindow = null;
+/** @type {Electron.BrowserWindow} */
+let pickerWindow = null;
 
 const create = () => {
-	const w = new BrowserWindow({
+	const { screen } = electron;
+	const { workAreaSize: { width, height } } = screen.getPrimaryDisplay();
+
+	mainWindow = new BrowserWindow({
 		width: 800,
 		height: 600,
 		titleBarStyle: 'hidden'
 	});
-
-	w.loadURL(
+	mainWindow.loadURL(
 		NODE_ENV === 'development'
-			? 'http://localhost:3000'
-			: `file://${libpath.join(__dirname, 'dst/index.html')}`
+			? 'http://localhost:3000/main'
+			: `file://${libpath.join(__dirname, 'dst/main/index.html')}`
 	);
-	w.on('closed', () => {
-		browserWindow = null;
+	mainWindow.on('closed', () => {
+		mainWindow = null;
 	});
 
-	browserWindow = w;
+	pickerWindow = new BrowserWindow({
+		width,
+		height,
+		transparent: true,
+		frame: false,
+		toolbar: false,
+		show: false,
+		x: 0,
+		y: 0
+	});
+	pickerWindow.loadURL(
+		NODE_ENV === 'development'
+			? 'http://localhost:3000/picker'
+			: `file://${libpath.join(__dirname, 'dst/picker/index.html')}`
+	);
+	pickerWindow.on('closed', () => {
+		pickerWindow = null;
+	});
 };
+
+ipcMain.on('main:exec/picker', () => {
+	pickerWindow.show();
+});
+
+ipcMain.on('picker:hide', () => {
+	pickerWindow.hide();
+});
+
+ipcMain.on('picker:post/color', (event, args) => {
+	pickerWindow.hide();
+
+	const { webContents } = mainWindow;
+
+	webContents.send('main:post/color', args);
+});
 
 app.on('ready', () => {
 	create();
@@ -40,7 +78,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-	if (!browserWindow) {
+	if (!mainWindow) {
 		create();
 	}
 });

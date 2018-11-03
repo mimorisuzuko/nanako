@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 import autobind from 'autobind-decorator';
 import Color from 'color';
 import fs from 'fs-extra';
@@ -10,6 +10,8 @@ import { List } from 'immutable';
 import ColorItem from './ColorItem';
 import { ToastContainer, toast } from 'react-toastify';
 import fz from 'fz';
+import { ipcRenderer } from 'electron';
+import { MdColorize } from 'react-icons/md';
 import './App.scss';
 
 const filename = libpath.join(os.homedir(), '.nanako');
@@ -34,6 +36,23 @@ export default class App extends Component {
 			tmpColor: '',
 			query: ''
 		};
+		this.$nameInput = createRef();
+
+		ipcRenderer.on('main:post/color', this.onPostColor);
+	}
+
+	@autobind
+	execColorPicker() {
+		ipcRenderer.send('main:exec/picker');
+	}
+
+	@autobind
+	onPostColor(event, args) {
+		const { color } = args;
+		const { $nameInput: { current } } = this;
+
+		this.setState({ tmpColor: color });
+		current.focus();
 	}
 
 	saveState(newState, rest = {}) {
@@ -178,11 +197,13 @@ export default class App extends Component {
 				</div>
 				<div styleName='colors'>{this.filteredColorsJSX()}</div>
 				<div styleName='footer'>
+					<MdColorize size='26px' onClick={this.execColorPicker} />
 					<input
 						type='text'
 						value={tmpName}
 						onChange={this.onChangeTmpName}
 						placeholder='Name'
+						ref={this.$nameInput}
 					/>
 					<input
 						type='text'

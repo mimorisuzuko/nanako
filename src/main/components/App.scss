@@ -39,9 +39,14 @@ $footer-height: 36px;
 	padding: 5px 10px;
 	z-index: 1;
 
+	svg {
+		vertical-align: middle;
+		cursor: pointer;
+	}
+
 	input[type='text'] {
 		padding: 4px 8px;
-		margin-right: 8px;
+		margin-left: 8px;
 	}
 
 	button {
@@ -52,6 +57,7 @@ $footer-height: 36px;
 		-webkit-app-region: no-drag;
 		outline: none;
 		cursor: pointer;
+		margin-left: 8px;
 	}
 }
 

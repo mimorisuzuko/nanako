@@ -12,15 +12,19 @@ module.exports = (env, { mode }) => {
 	const context = libpath.join(__dirname, 'src/');
 	const presets = ['react'];
 	const isProduction = mode === 'production';
-	const entryMain = [context];
+	const entryMain = [libpath.join(context, 'main')];
+	const entryPicker = [libpath.join(context, 'picker')];
 
 	const plugins = [
-		new CleanWebpackPlugin([dst], {
-			root: __dirname,
-			verbose: false,
-			dry: false,
-			exclude: ['index.html']
-		}),
+		new CleanWebpackPlugin(
+			[libpath.join(dst, 'main'), libpath.join(dst, 'picker')],
+			{
+				root: __dirname,
+				verbose: false,
+				dry: false,
+				exclude: ['index.html']
+			}
+		),
 		new DefinePlugin({
 			'process.env': {
 				NODE_ENV: JSON.stringify(mode)
@@ -46,9 +50,15 @@ module.exports = (env, { mode }) => {
 			'stage-3'
 		);
 		entryMain.push('babel-polyfill');
+		entryPicker.push('babel-polyfill');
 	} else {
 		plugins.push(new HotModuleReplacementPlugin());
 		entryMain.push(
+			'webpack-dev-server/client?http://0.0.0.0:3000',
+			'webpack/hot/only-dev-server',
+			'react-hot-loader/patch'
+		);
+		entryPicker.push(
 			'webpack-dev-server/client?http://0.0.0.0:3000',
 			'webpack/hot/only-dev-server',
 			'react-hot-loader/patch'
@@ -58,7 +68,8 @@ module.exports = (env, { mode }) => {
 	return {
 		context,
 		entry: {
-			index: entryMain
+			'main/index': entryMain,
+			'picker/index': entryPicker
 		},
 		output: {
 			path: libpath.join(__dirname, dst),

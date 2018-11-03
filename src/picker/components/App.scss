@@ -1,0 +1,21 @@
+.base {
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0);
+	position: relative;
+	
+	.picker {
+		position: absolute;
+		left: 0;
+		top: 0;
+
+		.colorcode {
+			font-family: sans-serif;
+		}
+
+		canvas {
+			display: block;
+			border: 1px solid black;
+		}
+	}
+}
