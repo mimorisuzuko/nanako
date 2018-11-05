@@ -15,9 +15,8 @@ const WIDTH = 7;
 const RATIO = 10;
 const DY = 24;
 
-if (!fs.existsSync(tmpdirname)) {
-	fs.mkdirSync(tmpdirname);
-}
+fs.removeSync(tmpdirname);
+fs.mkdirSync(tmpdirname);
 
 /**
  *
