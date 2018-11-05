@@ -38,7 +38,10 @@ const create = () => {
 		toolbar: false,
 		show: false,
 		x: 0,
-		y: 0
+		y: 0,
+		webPreferences: {
+			webSecurity: false
+		}
 	});
 	pickerWindow.loadURL(
 		NODE_ENV === 'development'

@@ -1,12 +1,38 @@
 import React, { Component, createRef } from 'react';
 import autobind from 'autobind-decorator';
 import { remote, ipcRenderer } from 'electron';
+import { exec } from 'child_process';
+import libpath from 'path';
+import fs from 'fs-extra';
+import { PNG } from 'pngjs';
+import Color from 'color';
 import './App.scss';
 
-const robot = remote.require('robotjs');
+const { app } = remote.require('electron');
+const tmpdirname = libpath.join(app.getAppPath(), '_tmp_');
+let capturedPath = libpath.join(tmpdirname, `${Date.now()}.png`);
 const WIDTH = 7;
 const RATIO = 10;
 const DY = 24;
+
+if (!fs.existsSync(tmpdirname)) {
+	fs.mkdirSync(tmpdirname);
+}
+
+/**
+ *
+ * @param {string} path
+ */
+const pathToPixels = async (path) => {
+	return new Promise((resolve) => {
+		fs
+			.createReadStream(path)
+			.pipe(new PNG({ filterType: 4 }))
+			.on('parsed', (data) => {
+				resolve(data);
+			});
+	});
+};
 
 export default class App extends Component {
 	constructor() {
@@ -26,9 +52,98 @@ export default class App extends Component {
 		window.addEventListener('keydown', this.onKeyDown);
 	}
 
+	componentDidMount() {
+		this._screen_();
+	}
+
 	@autobind
-	onKeyDown() {
-		ipcRenderer.send('picker:hide');
+	async _screen_() {
+		return (async () => {
+			const {
+				state: { screenX, screenY },
+				$canvas: { current: $canvas }
+			} = this;
+			const half = Math.floor(WIDTH / 2);
+
+			capturedPath = libpath.join(tmpdirname, `${Date.now()}.png`);
+
+			await new Promise((resolve) => {
+				exec(
+					`screencapture -x -R ${screenX - half},${screenY -
+						half},${WIDTH},${WIDTH} ${capturedPath}`,
+					() => {
+						resolve();
+					}
+				);
+			});
+
+			const width = RATIO * WIDTH;
+			const capturedWidth = WIDTH * 2;
+			const context = $canvas.getContext('2d');
+			const imageData = context.getImageData(0, 0, width, width);
+			const { data: dst } = imageData;
+			const data = await pathToPixels(capturedPath);
+
+			for (let i = 0; i < capturedWidth; i += 1) {
+				for (let j = 0; j < capturedWidth; j += 1) {
+					const index = 4 * (i + j * capturedWidth);
+					const r = data[index];
+					const g = data[index + 1];
+					const b = data[index + 2];
+
+					for (let n = 0; n < RATIO; n += 1) {
+						for (let m = 0; m < RATIO; m += 1) {
+							const target =
+								4 * (i * RATIO + n + (j * RATIO + m) * width);
+
+							dst[target] = r;
+							dst[target + 1] = g;
+							dst[target + 2] = b;
+							dst[target + 3] = 255;
+						}
+					}
+				}
+			}
+
+			context.putImageData(imageData, 0, 0);
+
+			const cx = half * RATIO;
+			const cy = half * RATIO;
+
+			context.fillStyle = 'black';
+			context.fillRect(cx - 1, cy - 1, RATIO + 2, 1);
+			context.fillRect(cx - 1, cy - 1, 1, RATIO + 2);
+			context.fillRect(cx - 1, cy - 1 + RATIO + 1, RATIO + 2, 1);
+			context.fillRect(cx - 1 + RATIO + 1, cy - 1, 1, RATIO + 2);
+			context.fillStyle = 'white';
+			context.fillRect(cx - 2, cy - 2, RATIO + 4, 1);
+			context.fillRect(cx - 2, cy - 2, 1, RATIO + 4);
+			context.fillRect(cx - 2, cy + RATIO + 1, RATIO + 4, 1);
+			context.fillRect(cx + RATIO + 1, cy - 2, 1, RATIO + 4);
+
+			await fs.unlink(capturedPath);
+
+			const { data: [r, g, b] } = context.getImageData(cx, cy, 1, 1);
+
+			this.setState({ color: Color({ r, g, b }).hex() }, () => {
+				setTimeout(this._screen_, 1);
+			});
+		})().catch((err) => {
+			console.log(err);
+			setTimeout(this._screen_, 1);
+		});
+	}
+
+	/**
+	 * @param {KeyboardEvent} e
+	 */
+	@autobind
+	onKeyDown(e) {
+		const { keyCode } = e;
+
+		if (keyCode === 27) {
+			ipcRenderer.send('picker:hide');
+		}
 	}
 
 	@autobind
@@ -44,51 +159,14 @@ export default class App extends Component {
 	@autobind
 	onMouseMove(e) {
 		const { clientX, clientY } = e;
-		const { $canvas: { current: $canvas } } = this;
-		const context = $canvas.getContext('2d');
-		const half = Math.floor(WIDTH / 2);
 		const screenX = clientX;
 		const screenY = clientY + DY;
-		let color = '#000000';
-
-		for (let i = 0; i < WIDTH; i += 1) {
-			for (let j = 0; j < WIDTH; j += 1) {
-				const x = screenX + i - half;
-				const y = screenY + j - half;
-				const fill =
-					x < innerWidth && y < innerHeight
-						? `#${robot.getPixelColor(x, y)}`
-						: '#000000';
-
-				if (x === screenX && y === screenY) {
-					color = fill;
-				}
-
-				context.fillStyle = fill;
-				context.fillRect(i * RATIO, j * RATIO, RATIO, RATIO);
-			}
-		}
-
-		const cx = half * RATIO;
-		const cy = half * RATIO;
-
-		context.fillStyle = 'black';
-		context.fillRect(cx - 1, cy - 1, RATIO + 2, 1);
-		context.fillRect(cx - 1, cy - 1, 1, RATIO + 2);
-		context.fillRect(cx - 1, cy - 1 + RATIO + 1, RATIO + 2, 1);
-		context.fillRect(cx - 1 + RATIO + 1, cy - 1, 1, RATIO + 2);
-		context.fillStyle = 'white';
-		context.fillRect(cx - 2, cy - 2, RATIO + 4, 1);
-		context.fillRect(cx - 2, cy - 2, 1, RATIO + 4);
-		context.fillRect(cx - 2, cy + RATIO + 1, RATIO + 4, 1);
-		context.fillRect(cx + RATIO + 1, cy - 2, 1, RATIO + 4);
 
 		this.setState({
 			screenX,
 			screenY,
 			mouseX: clientX,
-			mouseY: clientY,
-			color
+			mouseY: clientY
 		});
 	}
 
