@@ -1,5 +1,4 @@
-$picker-width: 76px;
-$picker-height: 96px;
+@import './App.json';
 
 .base {
 	width: 100%;
@@ -11,8 +10,8 @@ $picker-height: 96px;
 		position: absolute;
 		left: 0;
 		top: 0;
-		width: $picker-width;
-		height: $picker-width;
+		width: #{$pickerWidth}px;
+		height: #{$pickerHeight}px;
 
 		.colorcode {
 			font-family: sans-serif;
@@ -28,6 +27,3 @@ $picker-height: 96px;
 		}
 	}
 }
-
-@value strpickerWidth: #{$picker-width};
-@value strpickerHeight: #{$picker-height};

@@ -6,11 +6,9 @@ import libpath from 'path';
 import fs from 'fs-extra';
 import { PNG } from 'pngjs';
 import Color from 'color';
-import values from './App.scss';
+import { pickerWidth, pickerHeight } from './App.json';
+import './App.scss';
 
-const { strpickerWidth, strpickerHeight } = values;
-const pickerWidth = parseInt(strpickerWidth);
-const pickerHeight = parseInt(strpickerHeight);
 const { app } = remote.require('electron');
 const tmpdirname = libpath.join(app.getAppPath(), '_tmp_');
 let capturedPath = libpath.join(tmpdirname, `${Date.now()}.png`);

@@ -5,6 +5,7 @@ const {
 } = require('webpack');
 const libpath = require('path');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const jsonImporter = require('node-sass-json-importer');
 
 module.exports = (env, { mode }) => {
 	const dst = 'app/dst';
@@ -107,9 +108,14 @@ module.exports = (env, { mode }) => {
 					test: /\.scss$/,
 					use: [
 						'style-loader',
-						`css-loader?importLoader=1&modules&localIdentName=${generateScopedName}`,
+						`css-loader?importLoader=1r&modules&localIdentName=${generateScopedName}`,
 						'postcss-loader',
-						'sass-loader'
+						{
+							loader: 'sass-loader',
+							options: {
+								importer: jsonImporter()
+							}
+						}
 					]
 				},
 				{
