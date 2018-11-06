@@ -1,7 +1,7 @@
 {
   "name": "nanako",
   "version": "0.0.1",
-  "description": "Save my colors.",
+  "description": "Pick and save color",
   "main": "app/index.js",
   "scripts": {
     "build:pug": "./node_modules/.bin/pug --hierarchy -o app/dst/ src/",
