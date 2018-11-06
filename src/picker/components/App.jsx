@@ -6,8 +6,11 @@ import libpath from 'path';
 import fs from 'fs-extra';
 import { PNG } from 'pngjs';
 import Color from 'color';
-import './App.scss';
+import values from './App.scss';
 
+const { strpickerWidth, strpickerHeight } = values;
+const pickerWidth = parseInt(strpickerWidth);
+const pickerHeight = parseInt(strpickerHeight);
 const { app } = remote.require('electron');
 const tmpdirname = libpath.join(app.getAppPath(), '_tmp_');
 let capturedPath = libpath.join(tmpdirname, `${Date.now()}.png`);
@@ -176,7 +179,17 @@ export default class App extends Component {
 			<div styleName='base'>
 				<div
 					styleName='picker'
-					style={{ left: mouseX + 10, top: mouseY + 10 }}
+					C
+					style={{
+						left:
+							mouseX < innerWidth / 2
+								? mouseX + 10
+								: mouseX - 5 - pickerWidth,
+						top:
+							mouseY < innerHeight / 2
+								? mouseY + 10
+								: mouseY - 5 - pickerHeight
+					}}
 				>
 					<div styleName='colorcode'>{color}</div>
 					<canvas

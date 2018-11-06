@@ -1,3 +1,6 @@
+$picker-width: 76px;
+$picker-height: 96px;
+
 .base {
 	width: 100%;
 	height: 100%;
@@ -8,6 +11,8 @@
 		position: absolute;
 		left: 0;
 		top: 0;
+		width: $picker-width;
+		height: $picker-width;
 
 		.colorcode {
 			font-family: sans-serif;
@@ -23,3 +28,6 @@
 		}
 	}
 }
+
+@value strpickerWidth: #{$picker-width};
+@value strpickerHeight: #{$picker-height};
