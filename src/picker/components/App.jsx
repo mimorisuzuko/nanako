@@ -130,7 +130,7 @@ export default class App extends Component {
 				setTimeout(this._screen_, 1);
 			});
 		})().catch((err) => {
-			console.log(err);
+			console.error(err);
 			setTimeout(this._screen_, 1);
 		});
 	}
