@@ -1,6 +1,6 @@
 import React, { Component, createRef } from 'react';
 import autobind from 'autobind-decorator';
-import { remote, ipcRenderer } from 'electron';
+import { remote } from 'electron';
 import { exec } from 'child_process';
 import libpath from 'path';
 import fs from 'fs-extra';
@@ -10,6 +10,7 @@ import { pickerWidth, pickerHeight } from './App.json';
 import './App.scss';
 
 const { app } = remote.require('electron');
+const manager = remote.require('./');
 const tmpdirname = libpath.join(app.getAppPath(), '_tmp_');
 let capturedPath = libpath.join(tmpdirname, `${Date.now()}.png`);
 const WIDTH = 7;
@@ -142,7 +143,7 @@ export default class App extends Component {
 		const { keyCode } = e;
 
 		if (keyCode === 27) {
-			ipcRenderer.send('picker:hide');
+			manager.get('picker').hide();
 		}
 	}
 
@@ -150,7 +151,11 @@ export default class App extends Component {
 	onClick() {
 		const { state: { color } } = this;
 
-		ipcRenderer.send('picker:post/color', { color });
+		manager.get('picker').hide();
+
+		const { webContents } = manager.get('main');
+
+		webContents.send('post/color', { color });
 	}
 
 	/**

@@ -1,12 +1,14 @@
 const electron = require('electron');
-const { app, BrowserWindow, ipcMain } = electron;
+const { app, BrowserWindow } = electron;
 const libpath = require('path');
 const { env: { NODE_ENV } } = process;
 const {
 	default: installExtension,
 	REACT_DEVELOPER_TOOLS
 } = require('electron-devtools-installer');
+const Manager = require('./WindowManager');
 
+const manager = new Manager();
 /** @type {Electron.BrowserWindow} */
 let mainWindow = null;
 /** @type {Electron.BrowserWindow} */
@@ -51,23 +53,10 @@ const create = () => {
 	pickerWindow.on('closed', () => {
 		pickerWindow = null;
 	});
+
+	manager.register('main', mainWindow);
+	manager.register('picker', pickerWindow);
 };
-
-ipcMain.on('main:exec/picker', () => {
-	pickerWindow.show();
-});
-
-ipcMain.on('picker:hide', () => {
-	pickerWindow.hide();
-});
-
-ipcMain.on('picker:post/color', (event, args) => {
-	pickerWindow.hide();
-
-	const { webContents } = mainWindow;
-
-	webContents.send('main:post/color', args);
-});
 
 app.on('ready', () => {
 	create();
@@ -85,3 +74,5 @@ app.on('activate', () => {
 		create();
 	}
 });
+
+module.exports = manager;

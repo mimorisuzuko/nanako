@@ -12,9 +12,11 @@ import { ToastContainer, toast } from 'react-toastify';
 import fz from 'fz';
 import { ipcRenderer } from 'electron';
 import { MdColorize } from 'react-icons/md';
+import { remote } from 'electron';
 import './App.scss';
 
 const filename = libpath.join(os.homedir(), '.nanako');
+const manager = remote.require('./');
 
 if (!fs.existsSync(filename)) {
 	fs.writeFileSync(filename, JSON.stringify([]), { encoding: 'utf-8' });
@@ -38,12 +40,12 @@ export default class App extends Component {
 		};
 		this.$nameInput = createRef();
 
-		ipcRenderer.on('main:post/color', this.onPostColor);
+		ipcRenderer.on('post/color', this.onPostColor);
 	}
 
 	@autobind
 	execColorPicker() {
-		ipcRenderer.send('main:exec/picker');
+		manager.get('picker').show();
 	}
 
 	@autobind
