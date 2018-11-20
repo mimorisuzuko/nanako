@@ -182,7 +182,6 @@ export default class App extends Component {
 			<div styleName='base'>
 				<div
 					styleName='picker'
-					C
 					style={{
 						left:
 							mouseX < innerWidth / 2
