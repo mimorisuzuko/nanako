@@ -18,6 +18,7 @@
   "author": "Hiroki Usuba <hrky0206@gmail.com> (http://mimorisuzuko.github.io/)",
   "license": "MIT",
   "devDependencies": {
+    "@types/electron": "^1.6.10",
     "autobind-decorator": "^2.1.0",
     "autoprefixer": "^8.2.0",
     "babel-core": "^6.26.0",
